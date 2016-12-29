@@ -1,11 +1,11 @@
+#################################################################
+""" PLEASE EDIT BEFORE YOU RUN THIS IN A PERSONAL LOCATION"""
+#################################################################
+
 group_folder_loc="/phys/groups/tev/scratch1/users/WHHV/"
 Num_Events=10
 EVNTFile="10_events.EVNT"
 DAODFile="10_events.pool.root"
-
-
-
-
 cd $group_folder_loc
 
 
