@@ -3,20 +3,20 @@ chmod a+x generator_setup.sh
 
 
 #################################################################
-""" PLEASE EDIT THESE VARIABLES FOR YOUR NEEDS."""
+echo """ PLEASE EDIT THESE VARIABLES FOR YOUR NEEDS."""
 #################################################################
 Num_Events=10
 EVNTFile="10_events.EVNT"
 DAODFile="10_events.pool.root"
-Run_Num =304795
+Run_Num=304795
 
 
 ##########################
 #---Modular ROOT Setup---#
 ##########################
 
-#source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
-#lsetup "root 5.34.25-x86_64-slc6-gcc48-opt"
+source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
+lsetup "root 5.34.25-x86_64-slc6-gcc48-opt"
 #export PATH=/usr/bin:$PATH
 #echo -e "ROOT v5.34 is now setup\n"
 #assuming youve loaded up on bash.
