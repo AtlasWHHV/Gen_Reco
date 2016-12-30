@@ -70,7 +70,7 @@ elif runArgs.runNumber==303680:
 elif runArgs.runNumber==304795:
     mH=125
     mhS=25
-    nProcess=1
+    nProcess=3
     avgtau = 760
 elif runArgs.runNumber==303681:
     mH=125
