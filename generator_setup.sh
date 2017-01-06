@@ -5,9 +5,9 @@ chmod a+x generator_setup.sh
 #################################################################
 echo """ PLEASE EDIT THESE VARIABLES FOR YOUR NEEDS."""
 #################################################################
-Num_Events=10
-EVNTFile="10_events.EVNT"
-DAODFile="10_events.pool.root"
+Num_Events=5000
+EVNTFile="5000_events_v2.EVNT"
+DAODFile="5000_events_v2.pool.root"
 Run_Num=304795
 
 
@@ -39,7 +39,7 @@ source $ATLAS_LOCAL_ROOT_BASE/user/atlasLocalSetup.sh
 asetup 20.1.8.3,AtlasDerivation,gcc48,here
 
 #Change the input event file and output daod file
-Reco_tf.py --inputEVNTFile $EVNTFile --outputDAODFile $DAODFile --reductionConf TRUTH3
+Reco_tf.py --inputEVNTFile $EVNTFile --outputDAODFile $DAODFile --reductionConf TRUTH0
 )
 
 #python /phys/users/arbo94/Desktop/alert.py /phys/users/arbo94/Desktop/done.py
