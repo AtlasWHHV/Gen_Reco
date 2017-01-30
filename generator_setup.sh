@@ -14,9 +14,6 @@ Run_Num=304795
 #---Modular ROOT Setup---#
 ##########################
 
-#source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
-#lsetup "root 5.34.25-x86_64-slc6-gcc48-opt"
-
 
 echo "Starting the Generation Step"
 
