@@ -1,13 +1,12 @@
 #!/bin/bash
-chmod a+x generator_setup.sh
 
 
 #################################################################
 echo """ PLEASE EDIT THESE VARIABLES FOR YOUR NEEDS."""
 #################################################################
-Num_Events=5000
-EVNTFile="5000_events_v2.EVNT"
-DAODFile="5000_events_v2.pool.root"
+Num_Events=10
+EVNTFile="10_events_v2.EVNT"
+DAODFile="10_events_v2.pool.root"
 Run_Num=304795
 
 
@@ -15,11 +14,9 @@ Run_Num=304795
 #---Modular ROOT Setup---#
 ##########################
 
-source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
-lsetup "root 5.34.25-x86_64-slc6-gcc48-opt"
-#export PATH=/usr/bin:$PATH
-#echo -e "ROOT v5.34 is now setup\n"
-#assuming youve loaded up on bash.
+#source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
+#lsetup "root 5.34.25-x86_64-slc6-gcc48-opt"
+
 
 echo "Starting the Generation Step"
 
