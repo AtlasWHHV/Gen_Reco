@@ -1,38 +1,23 @@
 #!/bin/bash
 chmod a+x generator_setup.sh
 
-#################################################################
-echo """ PLEASE EDIT THESE VARIABLES FOR YOUR NEEDS."""
-#################################################################
-Num_Events=5000
-EVNTFile="5000_events_v2.EVNT"
-DAODFile="5000_events_v2.pool.root"
-Run_Num=304795
-
-
+RunNum=304795
+EventsPerBatch=5000
+StartingBatch=1
+EndingBatch=20
 
 echo "Starting the Generation Step"
 
 (
-
 source $AtlasSetup/scripts/asetup.sh here,19.2.4.14
-
-#Below, edit the output file, and max events for what you need
-
-Generate_tf.py --jobConfig hss-runner.py --maxEvents $Num_Events --runNumber $Run_Num --outputEVNTFile $EVNTFile --ecmEnergy 13000
+for ((i=StartingBatch ; i <= EndingBatch ; i++))
+do
+  # The generator has trouble cleaning up its temporary files, so do so for it.
+  rm -r PROC_HAHM_variableMW_v3_UFO_*
+  EVNTFile="${RunNum}.${EventsPerBatch}.${i}.EVNT"
+  echo "$EVNTFile"
+  FirstEvent=$(($EventsPerBatch*($i-1)+1))
+  echo "$FirstEvent"
+  Generate_tf.py --jobConfig hss-runner.py --maxEvents $EventsPerBatch --runNumber $RunNum --firstEvent $FirstEvent --outputEVNTFile $EVNTFile --ecmEnergy 13000
+done
 )
-
-echo "Starting the RECO step"
-
-(
-source $AtlasSetup/scripts/asetup.sh 20.1.8.3,AtlasDerivation,gcc48,here
-
-
-#Change the input event file and output daod file
-Reco_tf.py --inputEVNTFile $EVNTFile --outputDAODFile $DAODFile --reductionConf TRUTH0
-)
-
-
-
-
-
