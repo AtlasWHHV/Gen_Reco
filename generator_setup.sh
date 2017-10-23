@@ -5,6 +5,7 @@ RunNum=304795
 EventsPerBatch=5000
 StartingBatch=1
 EndingBatch=20
+MaxSeed=$((30081*30081))
 
 echo "Starting the Generation Step"
 
@@ -18,6 +19,8 @@ do
   echo "$EVNTFile"
   FirstEvent=$(($EventsPerBatch*($i-1)+1))
   echo "$FirstEvent"
-  Generate_tf.py --jobConfig hss-runner.py --maxEvents $EventsPerBatch --runNumber $RunNum --firstEvent $FirstEvent --outputEVNTFile $EVNTFile --ecmEnergy 13000
+  Seed=$(($(date +"%s") % MaxSeed))
+  echo "$Seed"
+  Generate_tf.py --jobConfig hss-runner.py --maxEvents $EventsPerBatch --runNumber $RunNum --firstEvent $FirstEvent --outputEVNTFile $EVNTFile --ecmEnergy 13000 --randomSeed $Seed --printEvts 3
 done
 )
