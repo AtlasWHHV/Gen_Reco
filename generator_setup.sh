@@ -17,6 +17,6 @@ do
   FirstEvent=$(($EventsPerBatch*($i-1)+1))
   Seed=$(($(date +"%s") % MaxSeed))
   echo "MC Seed = $Seed"
-  Generate_tf.py --jobConfig hss-runner.py --maxEvents $EventsPerBatch --runNumber $RunNum --firstEvent $FirstEvent --outputEVNTFile $EVNTFile --ecmEnergy 13000 --randomSeed $Seed --printEvts 3
+  Generate_tf.py --jobConfig hss-runner.py --maxEvents $EventsPerBatch --runNumber $RunNum --firstEvent $FirstEvent --outputEVNTFile $EVNTFile --ecmEnergy 13000 --randomSeed $Seed
 done
 )
