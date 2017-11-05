@@ -1,5 +1,4 @@
 #!/bin/bash
-chmod a+x gen_reco.sh
 
 source /phys/users/gwatts/bin/CommonScripts/configASetup.sh
 
@@ -30,5 +29,5 @@ ConditionsTag=OFLCOND-RUN12-SDR-20
 (
   source $AtlasSetup/scripts/asetup.sh here,19.2.4.14
   Reco_tf.py  --inputRDOFile $RDOFile --outputESDFile $ESDFile --maxEvents $MaxEvents --skipEvents $SkipEvents  --DBRelease current  --autoConfiguration='everything'  
-  Reco_tf.py --inputESDFile $ESDFile --outputAODFile $AODFile --maxEvents $MaxEVents --skipEvents $SkipEvents --DBRelease current --autoConfiguration='everything'
+  Reco_tf.py --inputESDFile $ESDFile --outputAODFile $AODFile --maxEvents $MaxEvents --skipEvents $SkipEvents --DBRelease current --autoConfiguration='everything'
 )    

@@ -11,7 +11,7 @@ def main():
   import dispy.httpd
   http_server = dispy.httpd.DispyHTTPServer(cluster)
   jobs = []
-  for i in range(1000):
+  for i in range(10):
     job = cluster.submit(random.randint(5, 20))
     job.id = i
     jobs.append(job)
