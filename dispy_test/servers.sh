@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PidsPath=~/.var/run
+PidsPath=/phys/groups/tev/scratch3/users/WHHV/.var/run
 DispyPath=~/.local/lib/python2.7/site-packages/dispy
-LogPath=./
+LogPath=/phys/groups/tev/scratch3/users/WHHV/logs
 
 case "$1" in
 start)
@@ -14,8 +14,9 @@ start)
   Idx=0
   for i in 01 02 03 04 05 06 07 08 09 10 11
   do
-    Pids[$Idx]=$(ssh tev${i}.phys.washington.edu "nohup python ${DispyPath}/dispynode.py --clean --daemon > ${LogPath}/${i}.log &" | grep -Eo '[0-9]+$')
-    echo Started dispy server with pid=${Pids[$Idx]} on tev${i}.
+    Log=${LogPath}/tev${i}_reco_dispy.log
+    Pids[$Idx]=$(ssh tev${i}.phys.washington.edu "nohup python ${DispyPath}/dispynode.py --clean --daemon > ${Log} &" | grep -Eo '[0-9]+$')
+    echo $'\t'"Started dispy server with pid=${Pids[$Idx]} on tev${i} with log at ${Log}"
     Idx=$((Idx+1))
   done
   echo "${Pids[*]}" > ${PidsPath}/reco_dispy.pids
@@ -29,7 +30,7 @@ stop)
   Idx=0
   for i in 01 02 03 04 05 06 07 08 09 10 11; do
     ssh tev${i}.phys.washington.edu "kill ${Pids[$Idx]}"
-    echo Stopped dispy server with pid=${Pids[$Idx]} on tev${i}.
+    echo "Stopped dispy server with pid=${Pids[$Idx]} on tev${i}."
     Idx=$((Idx+1))
   done
   rm ${PidsPath}/reco_dispy.pids
