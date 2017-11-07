@@ -2,22 +2,10 @@ from __future__ import division
 
 def compute(version_number, max_events, skip_events, event_file):
   ''' Runs reco.sh with the given parameters, using a tmp folder to clean up intermediary files. '''
-  import tempfile, subprocess, os, stat, shutil, socket, string, constants
-  log_file_handle, _ = tempfile.mkstemp(dir=constants.log_dir, prefix=(string.split(socket.gethostname(), sep='.')[0]+'_'), suffix='.log')
-  tmp_dir = tempfile.mkdtemp(dir=constants.tmp_dir)
-  arg = '{} {} {} {} {}'.format(constants.reco, version_number, max_events, skip_events, event_file)
-  process = subprocess.Popen(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess.STDOUT)
-  process.wait()
-  # move the aod file to the output directory, and make it immutable so that
-  # it is not accidentally deleted.
-  output_file = '{}.aod.pool.root'.format(version_number)
-  os.rename(tmp_dir + '/' + output_file, constants.aod_output_dir + '/' + output_file)
-  output_file = constants.aod_output_dir + '/' + output_file
-  st = os.stat(output_file)
-  not_writable = ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
-  os.chmod(output_file, st.st_mode & not_writable)
-  shutil.rmtree(tmp_dir)
-  return (socket.gethostname(), output_file)
+  import subprocess
+  arg = 'python {} -n {} -s {} {} {}'.format(constants.reco, max_events, skip_events, event_file, version_number)
+  subprocess.check_call(arg, executable='/bin/bash', shell=True)
+  return socket.gethostname()
 
 def dispatch_computations(batch_size, evnt_dir, test, local):
   import dispy, dispy.httpd, glob, math, string, constants
@@ -51,8 +39,8 @@ def dispatch_computations(batch_size, evnt_dir, test, local):
       job_id += 1
   if not test and not local:    
     for job in jobs:
-      host, aod_file = job()
-      print('{} executed job {} from {} to {} creating {}'.format(host, job.id, job.start_time, job.end_time, aod_file))
+      host = job()
+      print('{} executed job {} from {} to {}'.format(host, job.id, job.start_time, job.end_time))
     cluster.print_status()
     http_server.shutdown()
 
