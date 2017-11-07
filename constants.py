@@ -1,3 +1,7 @@
+servers = ['tev02', 'tev03', 'tev04', 'tev05', 'tev06', 'tev07', 'tev08', 'tev10']
+
+pids_dir = '/phys/groups/tev/scratch3/users/WHHV/.var/run'
+dispy_dir = '~/.local/lib/python2.7/site-packages/dispy'
 evnt_dir = '/phys/groups/tev/scratch3/users/WHHV/evnts'
 tmp_dir = '/phys/groups/tev/scratch3/users/WHHV/tmp'
 log_dir = '/phys/groups/tev/scratch3/users/WHHV/logs'
