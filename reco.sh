@@ -23,11 +23,11 @@ ConditionsTag=OFLCOND-RUN12-SDR-20
     
 (
   source $AtlasSetup/scripts/asetup.sh here,19.2.4.14
-  Digi_tf.py --inputHitsFile $HITSFile --outputRDOFile $RDOFile --maxEvents $MaxEvents --skipEvents $SkipEvents --geometryVersion $GeometryVersion --conditionsTag $ConditionsTag  
+  Digi_tf.py --inputHitsFile $HITSFile --outputRDOFile $RDOFile --maxEvents -1 --geometryVersion $GeometryVersion --conditionsTag $ConditionsTag  
 )
 
 (
   source $AtlasSetup/scripts/asetup.sh here,19.2.4.14
-  Reco_tf.py  --inputRDOFile $RDOFile --outputESDFile $ESDFile --maxEvents $MaxEvents --skipEvents $SkipEvents  --DBRelease current  --autoConfiguration='everything'  
-  Reco_tf.py --inputESDFile $ESDFile --outputAODFile $AODFile --maxEvents $MaxEvents --skipEvents $SkipEvents --DBRelease current --autoConfiguration='everything'
+  Reco_tf.py  --inputRDOFile $RDOFile --outputESDFile $ESDFile --maxEvents -1 --DBRelease current  --autoConfiguration='everything'  
+  Reco_tf.py --inputESDFile $ESDFile --outputAODFile $AODFile --maxEvents -1 --DBRelease current --autoConfiguration='everything'
 )    
