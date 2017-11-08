@@ -12,7 +12,7 @@ import os
 import shutil
 import pickle
 
-def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_dir, job_id):
+def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_dir, aod_dir, job_id):
   ''' Runs reco.py with the given parameters. '''
   import subprocess, constants, socket, os
   log_dir = os.path.join(log_dir, 'job{:0>4}'.format(job_id))
@@ -20,12 +20,12 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
   os.makedirs(log_dir)
   os.makedirs(tmp_dir)
   athena_log = os.path.join(log_dir, 'athena.log')
-  arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, event_file, version_number)
+  arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --aod_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
   with open(os.path.join(log_dir, 'reco.log'), 'w+') as fh:
     subprocess.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess.STDOUT)
   return socket.gethostname()
 
-def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir):
+def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
   evnt_files = glob.glob(evnt_dir + '/*.evnt.pool.root')
   print ('Found evnt files:')
   for ii, evnt_file in enumerate(evnt_files):
@@ -41,12 +41,12 @@ def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir):
     for _ in range(int(math.ceil(evnt_batch_size / batch_size))):
       job_batch_size = min(batch_size, evnt_batch_size - job_skip_events)
       job_version_number = "{}.{}.{}".format(evnt_version, job_batch_size, job_skip_events)
-      job_args.append((job_version_number, job_batch_size, job_skip_events, evnt_file, log_dir, tmp_dir, job_id))
+      job_args.append((job_version_number, job_batch_size, job_skip_events, evnt_file, log_dir, tmp_dir, aod_dir, job_id))
       job_skip_events += job_batch_size
       job_id += 1
   return job_args
 
-def dispatch_computations(job_args, test, local, log_dir, tmp_dir, timestamp):
+def dispatch_computations(job_args, test, local, timestamp):
   if not test and not local:
     cluster = dispy.JobCluster(compute, depends=[constants])
     http_server = dispy.httpd.DispyHTTPServer(cluster)
@@ -54,7 +54,7 @@ def dispatch_computations(job_args, test, local, log_dir, tmp_dir, timestamp):
     jobs = []
   job_args_dict = {}
   for job_arg in job_args:
-    job_version_number, job_batch_size, job_skip_events, evnt_file, log_dir, tmp_dir, job_id = job_arg
+    job_version_number, job_batch_size, job_skip_events, evnt_file, _, _, _, job_id = job_arg
     job_args_dict[job_id] = job_arg
     if test:
       print("job {:0>4}: version={}, batch_size={}, skip_events={}, evnt_file={}".format(job_id, job_version_number, job_batch_size, job_skip_events, evnt_file))
@@ -118,15 +118,17 @@ def main():
     timestamp = '{:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
   log_dir = os.path.join(constants.log_dir, timestamp)
   tmp_dir = os.path.join(constants.tmp_dir, timestamp)
+  aod_dir = os.path.join(constants.aod_dir, timestamp)
   os.makedirs(log_dir)
   os.makedirs(tmp_dir)
+  os.makedirs(aod_dir)
   if args.timestamp:
     with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'rb') as fj_handle:
       failed_jobs = pickle.load(fj_handle)
-    dispatch_computations(failed_jobs, args.test, args.local, log_dir, tmp_dir, timestamp)
+    dispatch_computations(failed_jobs, args.test, args.local, timestamp)
   else:
-    job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir)
-    dispatch_computations(job_args, args.test, args.local, log_dir, tmp_dir, timestamp)
+    job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
+    dispatch_computations(job_args, args.test, args.local, timestamp)
 
 if __name__ == '__main__':
   main()
