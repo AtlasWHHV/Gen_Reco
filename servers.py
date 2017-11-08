@@ -13,7 +13,7 @@ def start(pids_file):
   processes = []
   for server in constants.servers:
     log_file = os.path.join(constants.log_dir, server + '_reco_dispy.log')
-    arg = 'ssh {} "nohup python {} --clean --daemon > {} &" | grep -Eo "[0-9]+$"'.format(server, dispynode, log_file)
+    arg = 'ssh {} "nohup nice python {} --clean --daemon > {} &" | grep -Eo "[0-9]+$"'.format(server, dispynode, log_file)
     process = subprocess.Popen(arg, executable='/bin/bash', shell=True, stdout=subprocess.PIPE)
     processes.append(process)
   pids = []
