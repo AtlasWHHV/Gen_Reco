@@ -1,7 +1,7 @@
 servers = ['tev02', 'tev03', 'tev04', 'tev05', 'tev06', 'tev07', 'tev08', 'tev10']
 
+# Note: this directory should contain the Gen_Reco repository.
 root_dir = '/phys/groups/tev/scratch3/users/WHHV'
-reco = '/phys/users/schuya/whhv/Gen_Reco/reco.py'
 
 geometry_version = 'ATLAS-R2-2015-03-01-00_VALIDATION'
 conditions_tag = 'OFLCOND-RUN12-SDR-20'
@@ -19,5 +19,5 @@ evnt_dir = root_dir + '/evnts'
 tmp_dir = root_dir + '/tmp'
 log_dir = root_dir + '/logs'
 aod_dir = root_dir + '/aod'
-
+reco = root_dir + '/Gen_Reco/reco.py'
 
