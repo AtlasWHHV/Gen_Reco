@@ -9,27 +9,27 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
   rdo_file = version + '.rdo.pool.root'
   esd_file = version + '.esd.pool.root'
   aod_file = version + '.aod.pool.root'
-  outputs = (hits_file, rdo_file, esd_file, aod_file)
   log_file_handle = open(log_file, 'w+')
   source_arg = '. /phys/users/gwatts/bin/CommonScripts/configASetup.sh && . $AtlasSetup/scripts/asetup.sh here,'
-  sim_arg = source_arg + '{} && Sim_tf.py --inputEVNTFile {} --geometryVersion {} --conditionsTag {} --outputHITSFile {}  --physicsList "FTFP_BERT" --postInclude "PyJobTransforms/UseFrontier.py" --preInclude "EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py" --maxEvents {} --skipEvents {} --randomSeed "8" --simulator "MC12G4" --truthStrategy "MC12"'.format(sim_release, evnt_file, geometry_version, conditions_tag, hits_file, num_events, skip_events)
-  dig_arg = source_arg + '{} && Digi_tf.py --inputHitsFile {} --outputRDOFile {} --geometryVersion {} --conditionsTag {}'.format(dig_release, hits_file, rdo_file, geometry_version, conditions_tag)
-  reco_arg = source_arg + '{} && Reco_tf.py  --inputRDOFile {} --outputESDFile {} --DBRelease current  --autoConfiguration="everything" && Reco_tf.py --inputESDFile {} --outputAODFile {} --DBRelease current --autoConfiguration="everything"'.format(reco_release, rdo_file, esd_file, esd_file, aod_file)
-  for arg in (sim_arg, dig_arg, reco_arg):
+  hits_arg = source_arg + '{} && Sim_tf.py --inputEVNTFile {} --geometryVersion {} --conditionsTag {} --outputHITSFile {}  --physicsList "FTFP_BERT" --postInclude "PyJobTransforms/UseFrontier.py" --preInclude "EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py" --maxEvents {} --skipEvents {} --randomSeed "8" --simulator "MC12G4" --truthStrategy "MC12"'.format(sim_release, evnt_file, geometry_version, conditions_tag, hits_file, num_events, skip_events)
+  rdo_arg = source_arg + '{} && Digi_tf.py --inputHitsFile {} --outputRDOFile {} --geometryVersion {} --conditionsTag {}'.format(dig_release, hits_file, rdo_file, geometry_version, conditions_tag)
+  esd_arg = source_arg + '{} && Reco_tf.py  --inputRDOFile {} --outputESDFile {} --DBRelease current  --autoConfiguration="everything"'.format(reco_release, rdo_file, esd_file)
+  aod_arg = source_arg + '{} && Reco_tf.py --inputESDFile {} --outputAODFile {} --DBRelease current --autoConfiguration="everything"'.format(reco_release, esd_file, aod_file)
+  for arg, output in zip((hits_arg, rdo_arg, esd_arg, aod_arg), (hits_file, rdo_file, esd_file, aod_file)):
     try:
       subprocess.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-      print(e)
+      print('reco.py: {}'.format(e))
     # Remove all non-essential files after each step.
     for entry in os.listdir(tmp_dir):
       entry_path = os.path.join(tmp_dir, entry)
       try:
-        if os.path.isfile(entry_path) and entry not in outputs:
+        if os.path.isfile(entry_path) and entry != output:
           os.remove(entry_path)
         elif os.path.isdir(entry_path):
           shutil.rmtree(entry_path)
       except OSError as e:
-        print(e)
+        print('reco.py: {}'.format(e))
   # move the aod file to the output directory, and make it immutable so that
   # it is not accidentally deleted.
   os.rename(os.path.join(tmp_dir, aod_file), os.path.join(aod_dir, aod_file))
