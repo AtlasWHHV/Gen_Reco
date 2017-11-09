@@ -2,7 +2,7 @@ import constants
 import os
 import stat
 import shutil
-import subprocess
+import subprocess32
 
 def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version, conditions_tag, sim_release, dig_release, reco_release, log_file, tmp_dir):
   hits_file = version + '.hits.pool.root'

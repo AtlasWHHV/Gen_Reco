@@ -14,7 +14,7 @@ import pickle
 
 def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_dir, aod_dir, job_id):
   ''' Runs reco.py with the given parameters. '''
-  import subprocess, constants, socket, os
+  import subprocess32, constants, socket, os
   log_dir = os.path.join(log_dir, 'job{:0>4}'.format(job_id))
   tmp_dir = os.path.join(tmp_dir, 'job{:0>4}'.format(job_id))
   os.makedirs(log_dir)

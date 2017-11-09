@@ -1,7 +1,7 @@
 import argparse
 import constants
 import os
-import subprocess
+import subprocess32
 import shutil
 import pickle
 
