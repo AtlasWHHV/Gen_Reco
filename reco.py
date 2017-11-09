@@ -38,6 +38,7 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
   not_writable = ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
   os.chmod(aod_file_path, st.st_mode & not_writable) 
   shutil.rmtree(tmp_dir)
+  shutil.rmtree(log_dir)
 
 def main():
   import argparse

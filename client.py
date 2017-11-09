@@ -54,7 +54,7 @@ def check_jobs(jobs, job_args, tmp_dir, timestamp):
     try:
       host = job.result()
       print('[{}]: Executed job {:0>4}'.format(host))
-    except CalledProcessError as e:
+    except subprocess32.CalledProcessError as e:
       failed_jobs.append(job_args[job_id])
   if len(failed_jobs) != 0:
     print('[client]: The following jobs failed ({} in total): '.format(len(failed_jobs)))
@@ -66,13 +66,12 @@ def check_jobs(jobs, job_args, tmp_dir, timestamp):
 
 def dispatch_computations(job_args, tmp_dir, timestamp):
   client = distributed.Client('localhost:8786')
+  client.upload_file('constants.py')
   webbrowser.open('http://localhost:8787')
   jobs = []
   for job_arg in job_args:
     job = client.submit(compute, *job_arg)
     jobs.append(job)
-  with open(os.path.join(tmp_dir, 'jobs.futures'), 'wb+') as fj_handle:
-    pickle.dump(jobs, fj_handle)
   check_jobs(jobs, job_args, tmp_dir, timestamp)
 
 def clean():
@@ -100,12 +99,9 @@ def main():
   group = parser.add_mutually_exclusive_group()
   group.add_argument('-c', '--clean', action='store_true', help='Remove old recovery, temporary, and log files.')
   group.add_argument('-r', '--redispatch_timestamp', dest='timestamp', default=None, help='The timestamp of a run, the failed jobs of which will be redispatched.')
-  group.add_argument('--recover', default=None, help='Recover from client failure using provided timestamp.')
   args = parser.parse_args()
   if args.clean:
     clean()
-  if args.recover:
-    timestamp = args.recover
   elif args.timestamp:
     timestamp = args.timestamp
   else:
@@ -113,21 +109,13 @@ def main():
   log_dir = os.path.join(constants.log_dir, timestamp)
   tmp_dir = os.path.join(constants.tmp_dir, timestamp)
   aod_dir = os.path.join(constants.aod_dir, timestamp)
-  if not args.recover:
-    os.makedirs(log_dir)
-    os.makedirs(tmp_dir)
-    os.makedirs(aod_dir)
+  os.makedirs(log_dir)
+  os.makedirs(tmp_dir)
+  os.makedirs(aod_dir)
   if args.timestamp:
     with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'rb') as fj_handle:
       failed_jobs = pickle.load(fj_handle)
     dispatch_computations(failed_jobs, tmp_dir, timestamp)
-  elif args.recover:
-    with open(os.path.join(tmp_dir, 'jobs.args'), 'rb') as fj_handle:
-      job_args = pickle.load(fj_handle)
-    with open(os.path.join(tmp_dir, 'jobs.futures'), 'rb') as fj_handle:
-      jobs = pickle.load(fj_handle)
-    print ('[client]: Recovering jobs ({} in total):'.format(len(jobs)))
-    check_jobs(jobs, job_args, tmp_dir, timestamp)
   else:
     job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
     if args.test:
