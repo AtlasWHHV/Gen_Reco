@@ -1,7 +1,6 @@
 from __future__ import division
 import argparse
-import dispy
-import dispy.httpd
+import distributed
 import webbrowser
 import glob
 import math
@@ -27,7 +26,7 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
 
 def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
   evnt_files = glob.glob(evnt_dir + '/*.evnt.pool.root')
-  print ('Found evnt files:')
+  print ('[client]: Found evnt files:')
   for ii, evnt_file in enumerate(evnt_files):
     print('\t[{}] {}'.format(ii+1, evnt_file))
   job_id = 0
@@ -51,32 +50,30 @@ def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
 def check_jobs(jobs, job_args, tmp_dir, timestamp):
   failed_jobs = []
   for job_id, job in enumerate(jobs):
-    print ('Waiting for job {:0>4}'.format(job_id))
-    host = job()
-    if host is None:
+    print ('[client]: Waiting for job {:0>4}'.format(job_id))
+    try:
+      host = job.result()
+      print('[{}]: Executed job {:0>4}'.format(host))
+    except CalledProcessError as e:
       failed_jobs.append(job_args[job_id])
-      print('ERROR: job {:0>4} failed!'.format(job_id))
-    else:
-      print('{} executed job {:0>4} from {} to {}'.format(host, job_id, job.start_time, job.end_time))
   if len(failed_jobs) != 0:
-    print('The following jobs failed ({} in total): '.format(len(failed_jobs)))
+    print('[client]: The following jobs failed ({} in total): '.format(len(failed_jobs)))
     for job in failed_jobs:
       print('\tjob {:0>4}'.format(job[-1]))
     with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'wb+') as fj_handle:
        pickle.dump(failed_jobs, fj_handle)
-    print('Run "python client.py -r {}" to redispatch failed jobs.'.format(timestamp))
+    print('[client]: Run "python client.py -r {}" to redispatch failed jobs.'.format(timestamp))
 
 def dispatch_computations(job_args, tmp_dir, timestamp):
-  cluster = dispy.JobCluster(compute, depends=[constants])
-  http_server = dispy.httpd.DispyHTTPServer(cluster)
-  webbrowser.open('http://localhost:8181')
+  client = distributed.Client('localhost:8786')
+  webbrowser.open('http://localhost:8787')
   jobs = []
   for job_arg in job_args:
-    job = cluster.submit(*job_arg)
+    job = client.submit(compute, *job_arg)
     jobs.append(job)
+  with open(os.path.join(tmp_dir, 'jobs.futures'), 'wb+') as fj_handle:
+    pickle.dump(jobs, fj_handle)
   check_jobs(jobs, job_args, tmp_dir, timestamp)
-  cluster.print_status()
-  http_server.shutdown()
 
 def clean():
   for dir in (constants.log_dir, constants.tmp_dir):
@@ -88,12 +85,12 @@ def clean():
         elif os.path.isdir(entry_path):
           shutil.rmtree(entry_path, ignore_errors=True)
       except OSError as e:
-        print('clean: {}'.format(e))
+        print('[client]: clean: {}'.format(e))
   for entry in glob.glob('./_dispy_*'):
     try:
       os.remove(entry)
     except OSError as e:
-      print('clean: {}'.format(e))
+      print('[client]: clean: {}'.format(e))
 
 def main():
   parser = argparse.ArgumentParser(description='Dispatch reco jobs to tev machines.')
@@ -127,15 +124,16 @@ def main():
   elif args.recover:
     with open(os.path.join(tmp_dir, 'jobs.args'), 'rb') as fj_handle:
       job_args = pickle.load(fj_handle)
-    jobs = dispy.recover_jobs()
-    print ('Recovering jobs ({} in total):'.format(len(jobs)))
+    with open(os.path.join(tmp_dir, 'jobs.futures'), 'rb') as fj_handle:
+      jobs = pickle.load(fj_handle)
+    print ('[client]: Recovering jobs ({} in total):'.format(len(jobs)))
     check_jobs(jobs, job_args, tmp_dir, timestamp)
   else:
     job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
     if args.test:
       for job_arg in job_args:
         job_version_number, job_batch_size, job_skip_events, evnt_file, _, _, _, job_id = job_arg
-        print("job {:0>4}: version={}, batch_size={}, skip_events={}, evnt_file={}".format(job_id, job_version_number, job_batch_size, job_skip_events, evnt_file))
+        print("[client]: job {:0>4}: version={}, batch_size={}, skip_events={}, evnt_file={}".format(job_id, job_version_number, job_batch_size, job_skip_events, evnt_file))
     else:
       dispatch_computations(job_args, tmp_dir, timestamp)
   if args.test:
