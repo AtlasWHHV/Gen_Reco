@@ -13,8 +13,8 @@ def start(pids_file):
   processes = []
   for server in constants.servers:
     log_file = os.path.join(constants.log_dir, server + '_reco_dispy.log')
-    arg = 'ssh {} "nohup nice python {} --clean --daemon > {} &" | grep -Eo "[0-9]+$"'.format(server, dispynode, log_file)
-    process = subprocess.Popen(arg, executable='/bin/bash', shell=True, stdout=subprocess.PIPE)
+    arg = 'ssh {} "nohup python {} --clean --daemon > {} &" | grep -Eo "[0-9]+$"'.format(server, dispynode, log_file)
+    process = subprocess32.Popen(arg, executable='/bin/bash', shell=True, stdout=subprocess32.PIPE)
     processes.append(process)
   pids = []
   for process in processes:
@@ -32,7 +32,7 @@ def stop(pids_file):
     processes = []
     for server, pid in zip(constants.servers, pids):
       arg = 'ssh {} "kill {}"'.format(server, pid)
-      process = subprocess.Popen(arg, executable='/bin/bash', shell=True)
+      process = subprocess32.Popen(arg, executable='/bin/bash', shell=True)
       processes.append(process)
   for process in processes:
     process.wait()

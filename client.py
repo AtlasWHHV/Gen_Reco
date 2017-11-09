@@ -22,7 +22,7 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
   athena_log = os.path.join(log_dir, 'athena.log')
   arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --aod_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
   with open(os.path.join(log_dir, 'reco.log'), 'w+') as fh:
-    subprocess.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess.STDOUT)
+    subprocess32.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess32.STDOUT)
   return socket.gethostname()
 
 def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
@@ -46,7 +46,24 @@ def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
       job_id += 1
   return job_args
 
-def dispatch_computations(job_args, test, local, timestamp):
+def check_jobs(jobs, tmp_dir, timestamp):
+  failed_jobs = []
+  for job in jobs:
+    host = job()
+    if host is None:
+      failed_jobs.append(job_args_dict[job.id])
+      print('ERROR: job {:0>4} failed!'.format(job.id))
+    else:
+      print('{} executed job {:0>4} from {} to {}'.format(host, job.id, job.start_time, job.end_time))
+  if len(failed_jobs) != 0:
+    print('The following jobs failed ({} in total): '.format(len(failed_jobs)))
+    for job in failed_jobs:
+      print('\tjob {}'.format(job[-1]))
+    with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'wb+') as fj_handle:
+       pickle.dump(failed_jobs, fj_handle)
+    print('Run "python client.py -r {}" to redispatch failed jobs.'.format(timestamp))
+
+def dispatch_computations(job_args, test, local, tmp_dir, timestamp):
   if not test and not local:
     cluster = dispy.JobCluster(compute, depends=[constants])
     http_server = dispy.httpd.DispyHTTPServer(cluster)
@@ -65,21 +82,7 @@ def dispatch_computations(job_args, test, local, timestamp):
     else:
       compute(*job_arg)
   if not test and not local:
-    failed_jobs = []
-    for job in jobs:
-      host = job()
-      if host is None:
-        failed_jobs.append(job_args_dict[job.id])
-        print('ERROR: job {:0>4} failed!'.format(job.id))
-      else:
-        print('{} executed job {:0>4} from {} to {}'.format(host, job.id, job.start_time, job.end_time))
-    if len(failed_jobs) != 0:
-      print('The following jobs failed ({} in total): '.format(len(failed_jobs)))
-      for job in failed_jobs:
-        print('\tjob {}'.format(job[-1]))
-      with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'wb+') as fj_handle:
-         pickle.dump(failed_jobs, fj_handle)
-      print('Run "python client.py -r {}" to redispatch failed jobs.'.format(timestamp))
+    check_jobs(jobs, tmp_dir, timestamp)
     cluster.print_status()
     http_server.shutdown()
 
@@ -109,26 +112,33 @@ def main():
   group = parser.add_mutually_exclusive_group()
   group.add_argument('-c', '--clean', action='store_true', help='Remove old recovery, temporary, and log files.')
   group.add_argument('-r', '--redispatch_timestamp', dest='timestamp', default=None, help='The timestamp of a run, the failed jobs of which will be redispatched.')
+  group.add_argument('--recover', default=None, help='Recover from client failure using provided timestamp.')
   args = parser.parse_args()
   if args.clean:
     clean()
-  if args.timestamp:
+  elif args.recover:
+    timestamp = args.recover
+  elif args.timestamp:
     timestamp = args.timestamp
   else:
     timestamp = '{:%Y%m%d%H%M%S}'.format(datetime.datetime.now())
   log_dir = os.path.join(constants.log_dir, timestamp)
   tmp_dir = os.path.join(constants.tmp_dir, timestamp)
   aod_dir = os.path.join(constants.aod_dir, timestamp)
-  os.makedirs(log_dir)
-  os.makedirs(tmp_dir)
-  os.makedirs(aod_dir)
+  if not args.recover:
+    os.makedirs(log_dir)
+    os.makedirs(tmp_dir)
+    os.makedirs(aod_dir)
   if args.timestamp:
     with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'rb') as fj_handle:
       failed_jobs = pickle.load(fj_handle)
-    dispatch_computations(failed_jobs, args.test, args.local, timestamp)
+    dispatch_computations(failed_jobs, args.test, args.local, tmp_dir, timestamp)
+  elif args.recover:
+    jobs = dispy.recover_jobs()
+    check_jobs(jobs, tmp_dir, timestamp)
   else:
     job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
-    dispatch_computations(job_args, args.test, args.local, timestamp)
+    dispatch_computations(job_args, args.test, args.local, tmp_dir, timestamp)
 
 if __name__ == '__main__':
   main()

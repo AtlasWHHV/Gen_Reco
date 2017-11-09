@@ -11,7 +11,7 @@ Simulation is the process of taking event data and simulating the effects of the
 Digitization is the process of taking hits data from simulation and calculating the response of the detector to the particles. This produces the raw digital output that you would see at the real ATLAS detector.
 
 ## Reconstruction
-Reconstruction is the process of taking raw data from digitization and reconstructing likely particle tracks and energy deposits. This is known as event summary data. This data is then used to construct analysis object data, which is similar to the initial event data, except that instead of dealing with truth, we now have probabiltiies of possible events. In our project, relevant variables are extracted from this file and used to train the neural network.
+Reconstruction is the process of taking raw data from digitization and reconstructing likely particle tracks and energy deposits. This is known as event summary data. This data is then used to construct analysis object data, which is similar to the initial event data, except that instead of dealing with truth, we now have probabilities of possible events. In our project, relevant variables are extracted from this file and used to train the neural network.
 
 # Getting Started
 This section will provide you with the steps necessary to obtain a copy of the project and run it on your machine for development/testing purposes. See deployment for details on running a full-scale job.

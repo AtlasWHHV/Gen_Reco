@@ -17,8 +17,8 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
   aod_arg = source_arg + '{} && Reco_tf.py --inputESDFile {} --outputAODFile {} --DBRelease current --autoConfiguration="everything"'.format(reco_release, esd_file, aod_file)
   for arg, output in zip((hits_arg, rdo_arg, esd_arg, aod_arg), (hits_file, rdo_file, esd_file, aod_file)):
     try:
-      subprocess.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
+      subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
+    except subprocess32.CalledProcessError as e:
       print('reco.py: {}'.format(e))
     # Remove all non-essential files after each step.
     for entry in os.listdir(tmp_dir):

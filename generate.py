@@ -3,7 +3,7 @@ import os
 import stat
 import shutil
 import tempfile
-import subprocess
+import subprocess32
 import time
 import constants
 
@@ -21,7 +21,7 @@ def gen(batch_size, num_batches, evnt_dir, release, job_config, run_number):
     tmp_dir = tempfile.mkdtemp(dir=constants.tmp_dir)
     tmp_dirs.append(tmp_dir)
     arg = '. /phys/users/gwatts/bin/CommonScripts/configASetup.sh && . $AtlasSetup/scripts/asetup.sh here,{} && Generate_tf.py --jobConfig {} --maxEvents {} --runNumber {} --firstEvent {} --outputEVNTFile {} --ecmEnergy 13000 --randomSeed {}'.format(release, job_config, batch_size, run_number, first_event, evnt_file, seed)
-    process = subprocess.Popen(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess.STDOUT)
+    process = subprocess32.Popen(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
     processes.append(process)
   for i, process in enumerate(processes):
     return_code = process.wait()
