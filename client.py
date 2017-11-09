@@ -116,7 +116,7 @@ def main():
   args = parser.parse_args()
   if args.clean:
     clean()
-  elif args.recover:
+  if args.recover:
     timestamp = args.recover
   elif args.timestamp:
     timestamp = args.timestamp
@@ -139,6 +139,9 @@ def main():
   else:
     job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
     dispatch_computations(job_args, args.test, args.local, tmp_dir, timestamp)
-
+  if args.test:
+    shutil.rmtree(log_dir)
+    shutil.rmtree(tmp_dir)
+    shutil.rmtree(aod_dir)
 if __name__ == '__main__':
   main()
