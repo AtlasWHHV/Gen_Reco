@@ -1,5 +1,3 @@
-servers = ['tev02', 'tev03', 'tev04', 'tev05', 'tev06', 'tev07', 'tev08', 'tev10']
-
 # Note: this directory should contain the Gen_Reco repository.
 root_dir = '/phys/groups/tev/scratch3/users/WHHV'
 
@@ -13,8 +11,6 @@ sim_release = '19.2.4.14'
 dig_release = '19.2.4.14'
 reco_release = '19.2.4.14'
 
-dispy_dir = '~/.local/lib/python2.7/site-packages/dispy'
-pids_dir = root_dir + '/.var/run'
 evnt_dir = root_dir + '/evnts'
 tmp_dir = root_dir + '/tmp'
 log_dir = root_dir + '/logs'
