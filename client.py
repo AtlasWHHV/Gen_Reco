@@ -10,18 +10,28 @@ import datetime
 import os
 import shutil
 import pickle
+import subprocess32
+import sys
 
 def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_dir, aod_dir, job_id):
   ''' Runs reco.py with the given parameters. '''
-  import subprocess32, constants, socket, os
+  import subprocess32, shutil, constants, socket, os
   log_dir = os.path.join(log_dir, 'job{:0>4}'.format(job_id))
   tmp_dir = os.path.join(tmp_dir, 'job{:0>4}'.format(job_id))
-  os.makedirs(log_dir)
-  os.makedirs(tmp_dir)
+  try:
+    os.makedirs(log_dir)
+    os.makedirs(tmp_dir)
+  except OSError as e:
+    print(e)
   athena_log = os.path.join(log_dir, 'athena.log')
   arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --aod_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
   with open(os.path.join(log_dir, 'reco.log'), 'w+') as fh:
     subprocess32.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess32.STDOUT)
+  try:
+    shutil.rmtree(log_dir)
+    shutil.rmtree(tmp_dir)
+  except OSError as e:
+    print(e)
   return socket.gethostname()
 
 def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
@@ -53,8 +63,9 @@ def check_jobs(jobs, job_args, tmp_dir, timestamp):
     print ('[client]: Waiting for job {:0>4}'.format(job_id))
     try:
       host = job.result()
-      print('[{}]: Executed job {:0>4}'.format(host))
-    except subprocess32.CalledProcessError as e:
+      print('[{}]: Executed job {:0>4}'.format(host, job_id))
+    except Exception as e:
+      print(e)
       failed_jobs.append(job_args[job_id])
   if len(failed_jobs) != 0:
     print('[client]: The following jobs failed ({} in total): '.format(len(failed_jobs)))
@@ -102,7 +113,7 @@ def main():
   args = parser.parse_args()
   if args.clean:
     clean()
-  elif args.timestamp:
+  if args.timestamp:
     timestamp = args.timestamp
   else:
     timestamp = '{:%Y%m%d%H%M%S}'.format(datetime.datetime.now())

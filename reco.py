@@ -20,16 +20,6 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
       subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
     except subprocess32.CalledProcessError as e:
       print('reco.py: {}'.format(e))
-    # Remove all non-essential files after each step.
-    for entry in os.listdir(tmp_dir):
-      entry_path = os.path.join(tmp_dir, entry)
-      try:
-        if os.path.isfile(entry_path) and entry != output:
-          os.remove(entry_path)
-        elif os.path.isdir(entry_path):
-          shutil.rmtree(entry_path)
-      except OSError as e:
-        print('reco.py: {}'.format(e))
   # move the aod file to the output directory, and make it immutable so that
   # it is not accidentally deleted.
   os.rename(os.path.join(tmp_dir, aod_file), os.path.join(aod_dir, aod_file))
@@ -37,8 +27,6 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
   st = os.stat(aod_file_path)
   not_writable = ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
   os.chmod(aod_file_path, st.st_mode & not_writable) 
-  shutil.rmtree(tmp_dir)
-  shutil.rmtree(log_dir)
 
 def main():
   import argparse
