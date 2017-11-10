@@ -34,6 +34,17 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
     print(e)
   return socket.gethostname()
 
+def get_failed_jobs(tmp_dir, aod_dir):
+  with open(os.path.join(tmp_dir, 'jobs.args'), 'rb') as fj_handle:
+    job_args = pickle.load(fj_handle)
+  output_files = [os.path.basename(x) for x in glob.glob(os.path.join(aod_dir, '*.aod.pool.root'))]
+  failed_jobs = []
+  for job_arg in job_args:
+    aod_file = '{}.aod.pool.root'.format(job_arg[0])
+    if aod_file not in output_files:
+      failed_jobs.append(job_arg)
+  return failed_jobs
+
 def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
   evnt_files = glob.glob(evnt_dir + '/*.evnt.pool.root')
   print ('[client]: Found evnt files:')
@@ -71,8 +82,6 @@ def check_jobs(jobs, job_args, tmp_dir, timestamp):
     print('[client]: The following jobs failed ({} in total): '.format(len(failed_jobs)))
     for job in failed_jobs:
       print('\tjob {:0>4}'.format(job[-1]))
-    with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'wb+') as fj_handle:
-       pickle.dump(failed_jobs, fj_handle)
     print('[client]: Run "python client.py -r {}" to redispatch failed jobs.'.format(timestamp))
 
 def dispatch_computations(job_args, tmp_dir, timestamp):
@@ -120,12 +129,14 @@ def main():
   log_dir = os.path.join(constants.log_dir, timestamp)
   tmp_dir = os.path.join(constants.tmp_dir, timestamp)
   aod_dir = os.path.join(constants.aod_dir, timestamp)
-  os.makedirs(log_dir)
-  os.makedirs(tmp_dir)
-  os.makedirs(aod_dir)
+  if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+  if not os.path.exists(tmp_dir):
+    os.makedirs(tmp_dir)
+  if not os.path.exists(aod_dir):
+    os.makedirs(aod_dir)
   if args.timestamp:
-    with open(os.path.join(tmp_dir, 'failed_jobs.args'), 'rb') as fj_handle:
-      failed_jobs = pickle.load(fj_handle)
+    failed_jobs = get_failed_jobs(tmp_dir, aod_dir)
     dispatch_computations(failed_jobs, tmp_dir, timestamp)
   else:
     job_args = get_job_args(args.batch_size, args.evnt_dir, log_dir, tmp_dir, aod_dir)
