@@ -50,5 +50,5 @@ Once you're comfortable with how the scripts work, and you've modified the setti
 
 # Authors
 * Andrew Arbogast - *created the repository, created the initial script on which later work was based*
-* Xalvoe - *added the athena event generation job configuration scripts*
+* Nicolas Copernicus - *added the athena event generation job configuration scripts*
 * Alex Schuy - *added the distributed computation scripts*

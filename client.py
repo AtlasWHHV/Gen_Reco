@@ -24,7 +24,7 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
   except OSError as e:
     print(e)
   athena_log = os.path.join(log_dir, 'athena.log')
-  arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --aod_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
+  arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --output_dir {} {} {}'.format(constants.reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
   with open(os.path.join(log_dir, 'reco.log'), 'w+') as fh:
     subprocess32.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess32.STDOUT)
   try:
@@ -45,7 +45,7 @@ def get_failed_jobs(tmp_dir, aod_dir):
       failed_jobs.append(job_arg)
   return failed_jobs
 
-def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
+def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, output_dir):
   evnt_files = glob.glob(evnt_dir + '/*.evnt.pool.root')
   print ('[client]: Found evnt files:')
   for ii, evnt_file in enumerate(evnt_files):
@@ -61,7 +61,7 @@ def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
     for _ in range(int(math.ceil(evnt_batch_size / batch_size))):
       job_batch_size = min(batch_size, evnt_batch_size - job_skip_events)
       job_version_number = "{}.{}.{}".format(evnt_version, job_batch_size, job_skip_events)
-      job_args.append((job_version_number, job_batch_size, job_skip_events, evnt_file, log_dir, tmp_dir, aod_dir, job_id))
+      job_args.append((job_version_number, job_batch_size, job_skip_events, evnt_file, log_dir, tmp_dir, output_dir, job_id))
       job_skip_events += job_batch_size
       job_id += 1
   with open(os.path.join(tmp_dir, 'jobs.args'), 'wb+') as fj_handle:
