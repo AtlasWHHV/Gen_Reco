@@ -70,14 +70,15 @@ def get_job_args(batch_size, evnt_dir, log_dir, tmp_dir, aod_dir):
 
 def check_jobs(jobs, job_args, tmp_dir, timestamp):
   failed_jobs = []
-  for job_id, job in enumerate(jobs):
+  for job_arg, job in zip(job_args, jobs):
+    job_id = job_arg[-1]
     print ('[client]: Waiting for job {:0>4}'.format(job_id))
     try:
       host = job.result()
       print('[{}]: Executed job {:0>4}'.format(host, job_id))
     except Exception as e:
       print(e)
-      failed_jobs.append(job_args[job_id])
+      failed_jobs.append(job_arg)
   if len(failed_jobs) != 0:
     print('[client]: The following jobs failed ({} in total): '.format(len(failed_jobs)))
     for job in failed_jobs:
