@@ -9,6 +9,9 @@ def reco(evnt_file, version, aod_dir, num_events, skip_events, geometry_version,
   rdo_file = version + '.rdo.pool.root'
   esd_file = version + '.esd.pool.root'
   aod_file = version + '.aod.pool.root'
+  if os.path.exists(os.path.join(aod_dir, aod_file)):
+    print('{} already exists!'.format(aod_file))
+    return
   log_file_handle = open(log_file, 'w+')
   source_arg = '. /phys/users/gwatts/bin/CommonScripts/configASetup.sh && . $AtlasSetup/scripts/asetup.sh here,'
   hits_arg = source_arg + '{} && Sim_tf.py --inputEVNTFile {} --geometryVersion {} --conditionsTag {} --outputHITSFile {}  --physicsList "FTFP_BERT" --postInclude "PyJobTransforms/UseFrontier.py" --preInclude "EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py" --maxEvents {} --skipEvents {} --randomSeed "8" --simulator "MC12G4" --truthStrategy "MC12"'.format(sim_release, evnt_file, geometry_version, conditions_tag, hits_file, num_events, skip_events)
