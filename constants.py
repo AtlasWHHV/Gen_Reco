@@ -6,6 +6,7 @@ log_dir = root_dir + '/logs'
 aod_dir = root_dir + '/aod'
 reco = root_dir + '/Gen_Reco/reco.py'
 
+gen_release = '19.2.4.14'
 run_number = 304795
 gen_job_config = 'hss-runner.py'
 
