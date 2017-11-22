@@ -36,7 +36,7 @@ Then, run `python client.py -t` on another terminal. Press Ctrl + C on the first
 The files in this repository can be split into two main categories: generation (generate.py, hss-runner.py, MadGraphControl_HSS.py) and simulation/digitization/reconstruction (client.py, reco.py), usually referred to as simply reconstruction, or reco.
 
 ### Generation
-hss-runner.py and MadGraphControl_HSS.py are configuration files for athena event generation: they specify details regarding the hidden valley model and how it should be generated. They should generally not be modified unless the parameters of the project change. generate.py is a script that runs the athena event generation, creating a set of event files. Run `python generate.py -h` to see a complete listing of available options (this also works on client.py, servers.py, and reco.py).
+hss-runner.py and MadGraphControl_HSS.py are configuration files for athena event generation: they specify details regarding the hidden valley model and how it should be generated. They should generally not be modified unless the parameters of the project change. generate.py is a script that runs the athena event generation, creating a set of event files. Run `python generate.py -h` to see a complete listing of available options (this also works on client.py and reco.py).
 
 ### Reconstruction
 reco.py is similar to generate.py, but instead of generation, it performs the full simulation/digitization/reconstruction process on a given event file. This file can be run directly for testing purposes, but in deployment, it should only be run indirectly through client.py. client.py is a script that manages distributed computation across the tev machines: it essentially splits up the job of reconstructing a large set of events into small batches called jobs, and distributes these jobs to the tev machines. However, before this can be done, you must run dask-ssh as shown in the installation section, which primes the tev machines listed in hostfile.txt so that they are ready to receive jobs from client.py.
@@ -44,7 +44,7 @@ reco.py is similar to generate.py, but instead of generation, it performs the fu
 # Deployment
 Once you're comfortable with how the scripts work, and you've modified the settings as appropriate, you're ready to run a full-blown generation/reconstruction cycle. There are 4 steps to follow:
 1. Run `python generate.py -b BATCHSIZE -n NUM_BATCHES --evnt_dir EVNT_DIR`
-2. Run `python ~/.local/lib/python2.7/site-packages/distributed/cli/dask-ssh.py --scheduler tev01 --hostfile hostfile.txt --nthreads 8` (Find an appropriate number of threads such that the system does not reach 100% memory utilization, which can severely slow down computation).
+2. Run `python ~/.local/lib/python2.7/site-packages/distributed/cli/dask_ssh.py --scheduler tev01 --hostfile hostfile.txt --nthreads 8` (Find an appropriate number of threads such that the system does not reach 100% memory utilization, which can severely slow down computation).
 3. Run `python client.py -b BATCH_SIZE --evnt_dir EVNT_DIR` where BATCH_SIZE is the size of each job sent to each tev machine (around 10-50 is probably a good number), and EVNT_DIR should be the same as in step 1. It's a good idea to run this command with `-t` first, to make sure that your settings are correct.
 4. Analyze the logs from the run, and diagnose the causes of any failures. Once these issues are resolved, Run `python client.py -r TIMESTAMP`, where TIMESTAMP is the timestamp shown by step 3, to rerun the failed jobs. Repeat this step as necessary.
 
