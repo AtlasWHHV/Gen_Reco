@@ -28,7 +28,7 @@ The settings for the project are stored in the constants.py and hostfile.txt fil
 
 To check that you have everything setup correctly, run (on tev01):
 ```
-python ~/.local/lib/python2.7/site-packages/distributed/cli/dask-ssh.py --scheduler tev01 --hostfile hostfile.txt
+python ~/.local/lib/python2.7/site-packages/distributed/cli/dask_ssh.py --scheduler tev01 --hostfile hostfile.txt
 ```
 Then, run `python client.py -t` on another terminal. Press Ctrl + C on the first terminal to terminate the servers.
 
@@ -44,7 +44,7 @@ reco.py is similar to generate.py, but instead of generation, it performs the fu
 # Deployment
 Once you're comfortable with how the scripts work, and you've modified the settings as appropriate, you're ready to run a full-blown generation/reconstruction cycle. There are 4 steps to follow:
 1. Run `python generate.py -b BATCHSIZE -n NUM_BATCHES --evnt_dir EVNT_DIR`
-2. Run `python ~/.local/lib/python2.7/site-packages/distributed/cli/dask-ssh.py --scheduler tev01 --hostfile hostfile.txt`.
+2. Run `python ~/.local/lib/python2.7/site-packages/distributed/cli/dask-ssh.py --scheduler tev01 --hostfile hostfile.txt --nthreads 8` (Find an appropriate number of threads such that the system does not reach 100% memory utilization, which can severely slow down computation).
 3. Run `python client.py -b BATCH_SIZE --evnt_dir EVNT_DIR` where BATCH_SIZE is the size of each job sent to each tev machine (around 10-50 is probably a good number), and EVNT_DIR should be the same as in step 1. It's a good idea to run this command with `-t` first, to make sure that your settings are correct.
 4. Analyze the logs from the run, and diagnose the causes of any failures. Once these issues are resolved, Run `python client.py -r TIMESTAMP`, where TIMESTAMP is the timestamp shown by step 3, to rerun the failed jobs. Repeat this step as necessary.
 
