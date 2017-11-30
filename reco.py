@@ -13,6 +13,7 @@ def reco(evnt_file, version, output_dir, num_events, skip_events, log_file, tmp_
     output_file = string.split(input_file, sep='/')[-1] + '_' + tag.tag
     command = tag.command.format(input_file, output_file) + ' --maxEvents {} --skipEvents {}'.format(num_events, skip_events)
     arg = '{} {} && {}'.format(asetup, tag.release, command)
+    print('{} arg: {}'.format(tag.tag, arg))
     try:
       subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
     except subprocess32.CalledProcessError as e:
