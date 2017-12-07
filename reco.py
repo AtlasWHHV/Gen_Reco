@@ -18,6 +18,7 @@ def reco(evnt_file, version, output_dir, num_events, skip_events, log_file, tmp_
       subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
     except subprocess32.CalledProcessError as e:
       print('reco.py: {}'.format(e))
+      break
     input_file = output_file
   # move the aod file to the output directory, and make it immutable so that
   # it is not accidentally deleted.
