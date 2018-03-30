@@ -17,7 +17,10 @@ def gen(batch_size, num_batches, evnt_dir, release, job_config, run_number):
     evnt_files.append(evnt_file)
     first_event = num_batches * (i - 1) + 1
     seed = int(time.time()) % max_seed
-    log_file_handle = open(os.path.join(constants.log_dir, 'gen{}.log'.format(i)), 'w+')
+    log_file = os.path.join(constants.log_dir, 'gen{}.log'.format(i))
+    log_file_handle = open(log_file, 'w+')
+    st = os.stat(log_file)
+    os.chmod(log_file, st.st_mode | stat.S_IWOTH)
     tmp_dir = tempfile.mkdtemp(dir=constants.tmp_dir)
     tmp_dirs.append(tmp_dir)
     arg = '. /phys/users/gwatts/bin/CommonScripts/configASetup.sh && . $AtlasSetup/scripts/asetup.sh here,{} && Generate_tf.py --jobConfig {} --maxEvents {} --runNumber {} --firstEvent {} --outputEVNTFile {} --ecmEnergy 13000 --randomSeed {}'.format(release, job_config, batch_size, run_number, first_event, evnt_file, seed)

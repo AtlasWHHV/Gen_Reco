@@ -4,6 +4,7 @@ import stat
 import shutil
 import subprocess32
 import string
+import sys
 
 def reco(evnt_file, version, output_dir, num_events, skip_events, log_file, tmp_dir):
   log_file_handle = open(log_file, 'w+')
@@ -14,15 +15,17 @@ def reco(evnt_file, version, output_dir, num_events, skip_events, log_file, tmp_
     command = tag.command.format(input_file, output_file) + ' --maxEvents {} --skipEvents {}'.format(num_events, skip_events)
     arg = '{} {} && {}'.format(asetup, tag.release, command)
     print('{} arg: {}'.format(tag.tag, arg))
+    sys.stdout.flush()
     try:
       subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
     except subprocess32.CalledProcessError as e:
       print('reco.py: {}'.format(e))
+      sys.stdout.flush()
       break
     input_file = output_file
   # move the aod file to the output directory, and make it immutable so that
   # it is not accidentally deleted.
-  os.rename(os.path.join(output_dir, output_file), os.path.join(output_dir, output_file))
+  os.rename(os.path.join(tmp_dir, output_file), os.path.join(output_dir, output_file))
   output_file_path = os.path.join(output_dir, output_file)
   st = os.stat(output_file_path)
   not_writable = ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH)
