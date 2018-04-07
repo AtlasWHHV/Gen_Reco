@@ -17,7 +17,7 @@ def reco(evnt_file, version, output_dir, num_events, skip_events, log_file, tmp_
     print('{} arg: {}'.format(tag.tag, arg))
     sys.stdout.flush()
     try:
-      subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT)
+      subprocess32.check_call(arg, executable='/bin/bash', cwd=tmp_dir, shell=True, stdout=log_file_handle, stderr=subprocess32.STDOUT, env=os.environ.copy())
     except subprocess32.CalledProcessError as e:
       print('reco.py: {}'.format(e))
       sys.stdout.flush()

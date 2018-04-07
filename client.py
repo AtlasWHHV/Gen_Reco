@@ -24,9 +24,9 @@ def compute(version_number, max_events, skip_events, event_file, log_dir, tmp_di
   except OSError as e:
     print(e)
   athena_log = os.path.join(log_dir, 'athena.log')
-  arg = 'nice python {} -n {} -s {} --log_file {} --tmp_dir {} --output_dir {} {} {}'.format(reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
+  arg = 'nice {} {} -n {} -s {} --log_file {} --tmp_dir {} --output_dir {} {} {}'.format(sys.executable, reco, max_events, skip_events, athena_log, tmp_dir, aod_dir, event_file, version_number)
   with open(os.path.join(log_dir, 'reco.log'), 'w+') as fh:
-    subprocess32.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess32.STDOUT)
+    subprocess32.check_call(arg, executable='/bin/bash', shell=True, stdout=fh, stderr=subprocess32.STDOUT, cwd=os.getcwd(), env=os.environ.copy())
   try:
     shutil.rmtree(log_dir)
     shutil.rmtree(tmp_dir)
